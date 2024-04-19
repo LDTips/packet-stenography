@@ -7,6 +7,8 @@ from time import perf_counter, sleep
 import base64
 from random import randint, uniform
 
+UDP_SRC_IP = '192.168.1.19'
+UDP_DST_IP = '192.168.1.14'
 
 def xor(a, b):
     return bytes([a ^ b for a, b in zip(a, b)])
@@ -25,7 +27,7 @@ for i, c in enumerate(msg):
     # p1 - packet with XOR bytes, p2 packet with data (XORed with the p1 checksum)
     t1 = perf_counter()
     random_bytes = os.urandom(MSG_SIZE)
-    p1 = IP(dst='127.0.0.1') / UDP(sport=65123, dport=80) / Raw(load=random_bytes)
+    p1 = IP(src=UDP_SRC_IP, dst=UDP_DST_IP) / UDP(sport=65123, dport=80) / Raw(load=random_bytes)
     p1 = IP(raw(p1))  # Compile the packet to calculate chksum
 
     xor_pattern = bytes.fromhex((MSG_SIZE // 2) * hex(p1[UDP].chksum)[2:])
@@ -36,7 +38,7 @@ for i, c in enumerate(msg):
         new_xored_data += os.urandom(1)
 
     print(f"XORed {xor_pattern} and {xored_data}")
-    p2 = IP(dst='127.0.0.1') / UDP(sport=65123, dport=80) / Raw(load=new_xored_data+os.urandom(MSG_SIZE*2))
+    p2 = IP(src=UDP_SRC_IP ,dst=UDP_DST_IP) / UDP(sport=65123, dport=80) / Raw(load=new_xored_data+os.urandom(MSG_SIZE*2))
     # b1xb2xb3xb4xb5xb6
     # c1c2c1c2c1
     p_queue.append(p1)
