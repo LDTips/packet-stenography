@@ -33,7 +33,7 @@ while True:
         if b'....' in data:
             antygona += data[:64].split(b'....')[0]
             f = open('odszyfrowane.txt', 'w')
-            f.write(antygona.decode('ANSI'))
+            f.write(antygona.decode('iso_8859_1'))
             exit(0)
         antygona += data[:64]
-        print(data.decode('ANSI'))
+        print(data.decode('iso_8859_1'))
