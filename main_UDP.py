@@ -12,23 +12,30 @@ def xor(a, b):
     return bytes([a ^ b for a, b in zip(a, b)])
 
 msg = 'Hello this is a test message'
-BLOCK_SIZE = 128
-while len(msg) % BLOCK_SIZE != 0:  # Padding in order for splitting to work
+MSG_SIZE = 256
+while len(msg) % MSG_SIZE != 0:  # Padding in order for splitting to work
     msg += '.'
-msg = [msg[i:i + BLOCK_SIZE] for i in range(0, len(msg), BLOCK_SIZE)]  # Split msg into chunks
+msg = [msg[i:i + MSG_SIZE] for i in range(0, len(msg), MSG_SIZE)]  # Split msg into chunks
 
 p_queue = []
 for i, c in enumerate(msg):
     # p1 - packet with XOR bytes, p2 packet with data (XORed with the p1 checksum)
     t1 = perf_counter()
-    random_bytes = os.urandom(BLOCK_SIZE*2)
-    p1 = IP(dst='127.0.0.1') / UDP(sport=31245, dport=80) / Raw(load=random_bytes)
+    random_bytes = os.urandom(MSG_SIZE)
+    p1 = IP(dst='127.0.0.1') / UDP(sport=65123, dport=80) / Raw(load=random_bytes)
     p1 = IP(raw(p1))  # Compile the packet to calculate chksum
 
-    xor_pattern = bytes.fromhex((BLOCK_SIZE//2)*hex(p1[UDP].chksum)[2:])
+    xor_pattern = bytes.fromhex((MSG_SIZE // 2) * hex(p1[UDP].chksum)[2:])
     xored_data = xor(xor_pattern, c.encode('ANSI'))
+    new_xored_data = b''
+    for i in xored_data:
+        new_xored_data += i.to_bytes(1, 'big')
+        new_xored_data += os.urandom(1)
+
     print(f"XORed {xor_pattern} and {xored_data}")
-    p2 = IP(dst='127.0.0.1') / UDP(sport=31245, dport=80) / Raw(load=xored_data+os.urandom(BLOCK_SIZE))
+    p2 = IP(dst='127.0.0.1') / UDP(sport=65123, dport=80) / Raw(load=new_xored_data+os.urandom(MSG_SIZE*2))
+    # b1xb2xb3xb4xb5xb6
+    # c1c2c1c2c1
     p_queue.append(p1)
     p_queue.append(p2)
 
