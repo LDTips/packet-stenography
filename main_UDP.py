@@ -11,8 +11,11 @@ from random import randint, uniform
 def xor(a, b):
     return bytes([a ^ b for a, b in zip(a, b)])
 
-msg = 'Hello this is a test message'
-MSG_SIZE = 256
+
+with open('antygona.txt', 'r', encoding='ANSI') as file:
+    msg = file.read()
+
+MSG_SIZE = 64
 while len(msg) % MSG_SIZE != 0:  # Padding in order for splitting to work
     msg += '.'
 msg = [msg[i:i + MSG_SIZE] for i in range(0, len(msg), MSG_SIZE)]  # Split msg into chunks
