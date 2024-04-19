@@ -22,13 +22,13 @@ for i, c in enumerate(msg):
     # p1 - packet with XOR bytes, p2 packet with data (XORed with the p1 checksum)
     t1 = perf_counter()
     random_bytes = os.urandom(BLOCK_SIZE*2)
-    p1 = IP(dst='127.0.0.1') / UDP(dport=7) / Raw(load=random_bytes)
+    p1 = IP(dst='127.0.0.1') / UDP(sport=31245, dport=80) / Raw(load=random_bytes)
     p1 = IP(raw(p1))  # Compile the packet to calculate chksum
 
     xor_pattern = bytes.fromhex((BLOCK_SIZE//2)*hex(p1[UDP].chksum)[2:])
     xored_data = xor(xor_pattern, c.encode('ANSI'))
     print(f"XORed {xor_pattern} and {xored_data}")
-    p2 = IP(dst='127.0.0.1') / UDP(dport=7) / Raw(load=xored_data+os.urandom(BLOCK_SIZE))
+    p2 = IP(dst='127.0.0.1') / UDP(sport=31245, dport=80) / Raw(load=xored_data+os.urandom(BLOCK_SIZE))
     p_queue.append(p1)
     p_queue.append(p2)
 
