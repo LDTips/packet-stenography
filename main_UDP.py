@@ -30,7 +30,7 @@ for i, c in enumerate(msg):
     p1 = IP(src=UDP_SRC_IP, dst=UDP_DST_IP) / UDP(sport=65123, dport=80) / Raw(load=random_bytes)
     p1 = IP(raw(p1))  # Compile the packet to calculate chksum
 
-    xor_pattern = bytes.fromhex((MSG_SIZE // 2) * hex(p1[UDP].chksum)[2:])
+    xor_pattern = bytes.fromhex((MSG_SIZE // 2) * hex(p1[UDP].chksum)[2:].zfill(4))
     xored_data = xor(xor_pattern, c.encode('ANSI'))
     new_xored_data = b''
     for i in xored_data:

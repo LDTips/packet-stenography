@@ -28,7 +28,7 @@ while True:
         new_xored_data = b''
         for i in range(MSG_SIZE):
             new_xored_data += data[i*2].to_bytes(1, 'big')
-        xor_pattern = bytes.fromhex((MSG_SIZE // 2) * checksum[2:])
+        xor_pattern = bytes.fromhex((MSG_SIZE // 2) * checksum[2:].zfill(4))
         data = xor(new_xored_data, xor_pattern)
         if b'....' in data:
             antygona += data[:64].split(b'....')[0]
