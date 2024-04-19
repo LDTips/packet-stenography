@@ -30,9 +30,10 @@ while True:
             new_xored_data += data[i*2].to_bytes(1, 'big')
         xor_pattern = bytes.fromhex((MSG_SIZE // 2) * checksum[2:])
         data = xor(new_xored_data, xor_pattern)
-        antygona += data[:64]
-        print(data.decode('ANSI'))
-        if ('....' in data.decode('ANSI')):
+        if b'....' in data:
+            antygona += data[:64].split(b'....')[0]
             f = open('odszyfrowane.txt', 'w')
             f.write(antygona.decode('ANSI'))
             exit(0)
+        antygona += data[:64]
+        print(data.decode('ANSI'))
