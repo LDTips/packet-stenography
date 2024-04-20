@@ -1,5 +1,6 @@
 import sys
 
+from scapy.error import Scapy_Exception
 from scapy.layers.inet import UDP
 from scapy.utils import rdpcap
 MSG_SIZE=64
@@ -2442,7 +2443,12 @@ def xor(a, b):
 
 
 def check_pcap(file_name):
-    scapy_cap = rdpcap(file_name)
+    try:
+        scapy_cap = rdpcap(file_name)
+    except (Scapy_Exception, FileNotFoundError):
+        print("Niepoprawny plik!", file=sys.stderr)
+        sys.exit(1)
+
     pkts = [scapy_cap[i:i+2] for i in range(0, len(scapy_cap), 2)]
     correct = []
     for pkt_pair in pkts:
@@ -2462,9 +2468,14 @@ def check_pcap(file_name):
     return all(correct)
 
 if __name__ == '__main__':
-    print(
-        "Antygona w pakietach" if check_pcap(str(sys.argv[1])) else "Brak Antygony w pakietach"
-    )
+    if len(sys.argv) < 2 or str(sys.argv[1]) in ('h', 'help', 'pomoc'):
+        print("Uzycie: pcap_checker.exe <nazwa_pliku_pcap>")
+        print("Sprawdza czy kazdy pakiet w pliku zawiera dane stenograficzne Antygony")
+        sys.exit(0)
+    else:
+        print(
+            "Antygona w pakietach" if check_pcap(str(sys.argv[1])) else "Brak Antygony w pakietach"
+        )
 # for i in range(1, 15):
 #     print(f"{i} ", end='')
 #     print(
